@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:paddingBottom="8dp"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="8dp">
+
+
+    <TextView
+        android:id="@+id/txt_deviceName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="设备名称"
+        android:layout_alignParentLeft="true"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+    <TextView
+        android:id="@+id/txt_deviceAddress"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="设备地址"
+        android:layout_alignParentLeft="true"
+        android:layout_below="@+id/txt_deviceName"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:text="00 -mdb"
+        android:id="@+id/txt_RSSI"
+        android:layout_below="@+id/txt_deviceName"
+        android:layout_alignParentEnd="true" />
+
+</RelativeLayout>

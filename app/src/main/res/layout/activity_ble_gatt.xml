@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+
+    tools:context="com.ecnu.leondu.bluetoothdemo.BleGattActivity">
+
+    <RelativeLayout
+        android:id="@+id/Rlay_StateBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/design_fab_shadow_mid_color"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+
+        <TextView
+            android:id="@+id/txt_Final_Peripheral"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:text="Peripheral:   " />
+
+        <TextView
+            android:id="@+id/txt_Peripheral"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/txt_Final_Peripheral"
+            android:layout_toRightOf="@+id/txt_Final_Peripheral"
+            android:text="Peripheral" />
+
+        <TextView
+            android:id="@+id/txt_Final_RSSI"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_below="@+id/txt_Final_Peripheral"
+            android:text="RSSI: " />
+
+        <TextView
+            android:id="@+id/txt_RSSI"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/txt_Final_RSSI"
+            android:layout_alignLeft="@+id/txt_Peripheral"
+            android:text="RSSI " />
+
+        <TextView
+            android:id="@+id/txt_Final_Address"
+            android:textStyle="bold"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/txt_Final_RSSI"
+            android:text="Address: " />
+
+        <TextView
+            android:id="@+id/txt_Address"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/txt_Final_Address"
+            android:layout_alignLeft="@+id/txt_Peripheral"
+            android:text="Address" />
+
+        <TextView
+            android:id="@+id/txt_Final_Status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:layout_below="@+id/txt_Final_Address"
+            android:text="Status: " />
+
+        <TextView
+            android:id="@+id/txt_Status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignBottom="@+id/txt_Final_Status"
+            android:layout_alignLeft="@+id/txt_Peripheral"
+            android:text="Status" />
+    </RelativeLayout>
+
+    <android.support.v7.widget.RecyclerView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/Recycler_Services"
+        android:layout_below="@+id/Rlay_StateBar"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+
+    </android.support.v7.widget.RecyclerView>
+
+</RelativeLayout>
