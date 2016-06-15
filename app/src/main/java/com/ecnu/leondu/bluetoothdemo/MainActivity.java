@@ -161,7 +161,7 @@ public class MainActivity extends AppCompatActivity {
 
             mScanning = true;
             bluetoothLeScanner.startScan(scanCallback);
-            Toast.makeText(getBaseContext(), "开始扫描", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getBaseContext(), "开始扫描ing", Toast.LENGTH_SHORT).show();
         } else {
             mScanning = false;
             bluetoothLeScanner.stopScan(scanCallback);
