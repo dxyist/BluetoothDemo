@@ -28,9 +28,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -38,27 +36,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivityCopy extends AppCompatActivity {
 
-    private final static String TAG = MainActivity.class.getSimpleName();
+    private final static String TAG = MainActivityCopy.class.getSimpleName();
     private final static String UUID_KEY_DATA = "0000ffe1-0000-1000-8000-00805f9b34fb";
     // ListAdapter
-    private ListView listView;
     private LeDeviceListAdapter mLeDeviceListAdapter;
     public static BluetoothAdapter bluetoothAdapter;
     public static BluetoothLeClass mBLE;
     private Boolean isScanning;
-    public static List<BluetoothGattService> gattServices;
-    BluetoothDevice device;
 
     private static final int REQUEST_ENABLE_BT = 1;
 
     BluetoothSocket bluetoothSocket;
 
-
-
     public RecyclerView recyclerView;
     public ArrayAdapter<String> arrayAdapter;
+    DeviceRecyclerViewAdapter deviceRecyclerViewAdapter;
     BluetoothLeScanner bluetoothLeScanner;
 
 
@@ -79,28 +73,10 @@ public class MainActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         pairedDevices = new ArrayList<BluetoothDevice>();
-        listView = (ListView) findViewById(R.id.listView);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
 
-                BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-                if (device != null) {
-
-//                    bluetoothAdapter.stopLeScan(mLeScanCallback);
-                    device = mLeDeviceListAdapter.getDevice(position);
-
-                    mBLE.connect(device.getAddress());
-
-
-                } else {
-                    Toast.makeText(getBaseContext(), "地址为空", Toast.LENGTH_SHORT).show();
-                }
-                ;
-            }
-        });
-
-
+        recyclerView = (RecyclerView) findViewById(R.id.Recycler_list);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        recyclerView.addItemDecoration(new RecycleViewDivider(this, LinearLayoutManager.HORIZONTAL));
         // 确认设备是否支持蓝牙BLE
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, R.string.ble_not_supported, Toast.LENGTH_SHORT).show();
@@ -125,21 +101,19 @@ public class MainActivity extends AppCompatActivity {
         // 不太确定这句话有什么用
         bluetoothAdapter.enable();
         mBLE = new BluetoothLeClass(this);
-
-
         if (!mBLE.initialize()) {
             Log.e(TAG, "Unable to initialize Bluetooth");
             finish();
         }
         //发现BLE终端的Service时回调
 
-        mBLE.setOnServiceDiscoverListener(mOnServiceDiscover);
+//        mBLE.setOnServiceDiscoverListener(mOnServiceDiscover);
 //        //收到BLE终端数据交互的事件
-        mBLE.setOnDataAvailableListener(mOnDataAvailable);
+//        mBLE.setOnDataAvailableListener(mOnDataAvailable);
 
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setVisibility(View.INVISIBLE);
+        fab.setVisibility(View.INVISIBLE);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -164,11 +138,9 @@ public class MainActivity extends AppCompatActivity {
 
 
                     BluetoothDevice device = result.getDevice();
-//                    Toast.makeText(getBaseContext(), "发现设备", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "发现设备", Toast.LENGTH_SHORT).show();
                     pairedDevices.add(device);
-                    mLeDeviceListAdapter.addDevice(device);
-                    mLeDeviceListAdapter.notifyDataSetChanged();
-
+                    deviceRecyclerViewAdapter.notifyDataSetChanged();
                 }
             });
         } else {
@@ -177,7 +149,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
                     // get the discovered device as you wish
-//                    Toast.makeText(getBaseContext(), "发现设备", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getBaseContext(), "发现设备", Toast.LENGTH_SHORT).show();
                 }
             });
         }
@@ -212,9 +184,6 @@ public class MainActivity extends AppCompatActivity {
 //            super.onScanResult(callbackType, result);
             BluetoothDevice device = result.getDevice();
             pairedDevices.add(device);
-            mLeDeviceListAdapter.addDevice(device);
-            mLeDeviceListAdapter.notifyDataSetChanged();
-
             Toast.makeText(getBaseContext(), "发现设备", Toast.LENGTH_SHORT).show();
             Log.i(TAG, "Device name: " + device.getName());
             Log.i(TAG, "Device address: " + device.getAddress());
@@ -226,7 +195,7 @@ public class MainActivity extends AppCompatActivity {
             Log.i(TAG, "Record device name: " + record.getDeviceName());
             Log.i(TAG, "Record service UUIDs: " + record.getServiceUuids());
             Log.i(TAG, "Record service data: " + record.getServiceData());
-
+            deviceRecyclerViewAdapter.notifyDataSetChanged();
         }
 
         @Override
@@ -244,13 +213,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onServiceDiscover(BluetoothGatt gatt) {
 
-//            displayGattServices(mBLE.getSupportedGattServices());
-            MainActivity.gattServices = gatt.getServices();
-            Toast.makeText(getBaseContext(),"MainActivity --->> 发现服务!! ",Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(MainActivity.this, BleGattActivity.class);
-            intent.putExtra("Device_Address", device.getAddress());
-            Toast.makeText(getBaseContext(),"连接地址是"+device.getAddress()+"\n"+"设备名称是："+device.getName(),Toast.LENGTH_SHORT).show();
-            startActivity(intent);
+            displayGattServices(mBLE.getSupportedGattServices());
         }
 
     };
@@ -292,19 +255,20 @@ public class MainActivity extends AppCompatActivity {
     // Device scan callback.
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
-
                 @Override
-                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+                public void onLeScan(final BluetoothDevice device, int rssi,
+                                     byte[] scanRecord) {
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-
-                            mLeDeviceListAdapter.addDevice(device);
-                            mLeDeviceListAdapter.notifyDataSetChanged();
+                            Toast.makeText(getBaseContext(), "发现设备", Toast.LENGTH_SHORT).show();
+                            pairedDevices.add(device);
+                            deviceRecyclerViewAdapter.notifyDataSetChanged();
                         }
                     });
                 }
             };
+
 
     private void displayGattServices(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;
@@ -368,6 +332,74 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    private class DeviceRecyclerViewAdapter extends RecyclerView.Adapter {
+        class deviceHolder extends RecyclerView.ViewHolder {
+
+            private TextView deviceNameTextView;
+            private TextView deviceAddressTextView;
+            private View itemView;
+
+            public View getItemView() {
+                return itemView;
+            }
+
+            public deviceHolder(View itemView) {
+                super(itemView);
+                deviceNameTextView = (TextView) itemView.findViewById(R.id.txt_deviceName);
+                deviceAddressTextView = (TextView) itemView.findViewById(R.id.txt_deviceAddress);
+                this.itemView = itemView;
+            }
+
+            public TextView getDeviceNameTextView() {
+
+                return deviceNameTextView;
+            }
+
+            public TextView getDeviceAddressTextView() {
+                return deviceAddressTextView;
+            }
+
+        }
+
+        @Override
+        public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+
+            return new deviceHolder(LayoutInflater.from(getBaseContext()).inflate(R.layout.item_device, null));
+        }
+
+        @Override
+        public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+
+            final deviceHolder viewHolder = (deviceHolder) holder;
+            viewHolder.getDeviceNameTextView().setText(pairedDevices.get(position).getName());
+            viewHolder.getDeviceAddressTextView().setText(pairedDevices.get(position).getAddress());
+
+            viewHolder.getItemView().setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (pairedDevices.get(position).getAddress() != null) {
+                        mBLE.connect(pairedDevices.get(position).getAddress());
+                        Intent intent = new Intent(MainActivityCopy.this, BleGattActivity.class);
+                        intent.putExtra("Device_Address", pairedDevices.get(position).getAddress());
+                        bluetoothAdapter.stopLeScan(mLeScanCallback);
+                        startActivity(intent);
+
+                    } else {
+                        Toast.makeText(getBaseContext(), "地址为空", Toast.LENGTH_SHORT).show();
+                    }
+                }
+            });
+
+        }
+
+        @Override
+        public int getItemCount() {
+            return pairedDevices.size();
+        }
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -394,18 +426,17 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        mLeDeviceListAdapter = new LeDeviceListAdapter(this);
-        listView.setAdapter(mLeDeviceListAdapter);
-//        scanLeDevice(true);
-        scanLeDevice(true);
 
+        scanLeDevice(true);
+//        scanBLE();
+        deviceRecyclerViewAdapter = new DeviceRecyclerViewAdapter();
+        recyclerView.setAdapter(deviceRecyclerViewAdapter);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-//        scanLeDevice(false);
-
+        scanLeDevice(false);
     }
 
     @Override
@@ -417,7 +448,6 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mLeDeviceListAdapter.clear();
         mBLE.disconnect();
         mBLE.close();
     }

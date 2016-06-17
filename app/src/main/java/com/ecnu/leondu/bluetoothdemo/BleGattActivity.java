@@ -46,6 +46,7 @@ public class BleGattActivity extends AppCompatActivity {
     private TextView rssiTextView;
     private TextView addressTextView;
     private TextView statusTextView;
+    private TextView serviceNumberTextView;
 
     private RecyclerView recyclerView;
 
@@ -60,15 +61,21 @@ public class BleGattActivity extends AppCompatActivity {
         rssiTextView = (TextView) findViewById(R.id.txt_RSSI);
         addressTextView = (TextView) findViewById(R.id.txt_Address);
         statusTextView = (TextView) findViewById(R.id.txt_Status);
+        serviceNumberTextView = (TextView) findViewById(R.id.txt_serviceName);
         // RecyclerView
         recyclerView = (RecyclerView) findViewById(R.id.Recycler_Services);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.addItemDecoration(new RecycleViewDivider(this, LinearLayoutManager.HORIZONTAL));
 
         mBLE = MainActivity.mBLE;
+        //发现BLE终端的Service时回调
+//        mBLE.setOnServiceDiscoverListener(mOnServiceDiscover);
+        //收到BLE终端数据交互的事件
+//        mBLE.setOnDataAvailableListener(mOnDataAvailable);
         deviceAddress = getIntent().getStringExtra("Device_Address");
-        mBLE.connect(deviceAddress);
+//        mBLE.connect(deviceAddress);
 
+        this.gattServices = MainActivity.gattServices;
         bluetoothAdapter = MainActivity.bluetoothAdapter;
         bluetoothDevice = bluetoothAdapter.getRemoteDevice(deviceAddress);
 
@@ -88,30 +95,28 @@ public class BleGattActivity extends AppCompatActivity {
 
         mHandler = new android.os.Handler();
 
-        //发现BLE终端的Service时回调
-        mBLE.setOnServiceDiscoverListener(mOnServiceDiscover);
-        //收到BLE终端数据交互的事件
-        mBLE.setOnDataAvailableListener(mOnDataAvailable);
 
-        mBLE.setOnConnectListener(new BluetoothLeClass.OnConnectListener() {
 
-            @Override
-            public void onConnect(BluetoothGatt gatt) {
-                Toast.makeText(getApplicationContext(), "蓝牙已连接", Toast.LENGTH_SHORT).show();
-                isConnected = true;
-                connectItem.setTitle("connected");
-            }
-        });
 
-        mBLE.setOnDisconnectListener(new BluetoothLeClass.OnDisconnectListener() {
-
-            @Override
-            public void onDisconnect(BluetoothGatt gatt) {
-                Toast.makeText(getBaseContext(), "蓝牙连接已断开", Toast.LENGTH_SHORT).show();
-                isConnected = false;
-                connectItem.setTitle("disconnected");
-            }
-        });
+//        mBLE.setOnConnectListener(new BluetoothLeClass.OnConnectListener() {
+//
+//            @Override
+//            public void onConnect(BluetoothGatt gatt) {
+//                Toast.makeText(getApplicationContext(), "蓝牙已连接", Toast.LENGTH_SHORT).show();
+//                isConnected = true;
+//                connectItem.setTitle("connected");
+//            }
+//        });
+//
+//        mBLE.setOnDisconnectListener(new BluetoothLeClass.OnDisconnectListener() {
+//
+//            @Override
+//            public void onDisconnect(BluetoothGatt gatt) {
+//                Toast.makeText(getBaseContext(), "蓝牙连接已断开", Toast.LENGTH_SHORT).show();
+//                isConnected = false;
+//                connectItem.setTitle("disconnected");
+//            }
+//        });
     }
 
 
@@ -122,7 +127,20 @@ public class BleGattActivity extends AppCompatActivity {
 
         @Override
         public void onServiceDiscover(BluetoothGatt gatt) {
+
+//            Toast.makeText(getBaseContext(),"发现服务！！！"+"\n"+"服务数量为"+mBLE.getSupportedGattServices().size(),Toast.LENGTH_SHORT).show();
+
 //            displayGattServices(mBLE.getSupportedGattServices());
+//            gattServices =  gatt.getServices();
+
+//            gattServices =  mBLE.getSupportedGattServices();
+//        serviceRecyclerViewAdapter.notifyDataSetChanged();
+//            serviceNumberTextView.setText(gattServices.size()+"");
+
+//            serviceRecyclerViewAdapter.notifyDataSetChanged();
+//            gattServices = mBLE.getSupportedGattServices();
+//            Toast.makeText(getBaseContext(), "发现服务!!!", Toast.LENGTH_SHORT).show();
+
         }
 
     };
@@ -160,7 +178,7 @@ public class BleGattActivity extends AppCompatActivity {
         }
     };
 
-//
+
 //    private void displayGattServices(List<BluetoothGattService> gattServices) {
 //        if (gattServices == null) return;
 //
@@ -234,7 +252,7 @@ public class BleGattActivity extends AppCompatActivity {
             public deviceHolder(View itemView) {
                 super(itemView);
                 serviceNameTextView = (TextView) itemView.findViewById(R.id.txt_serviceName);
-                serviceUUIDTextView = (TextView) itemView.findViewById(R.id.txt_serviceName);
+                serviceUUIDTextView = (TextView) itemView.findViewById(R.id.txt_serviceUuid);
                 servicePermissionTextView = (TextView) itemView.findViewById(R.id.txt_servicePermission);
                 this.itemView = itemView;
             }
@@ -268,9 +286,9 @@ public class BleGattActivity extends AppCompatActivity {
         public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
 
             final deviceHolder viewHolder = (deviceHolder) holder;
-            viewHolder.getServiceNameTextView().setText(gattServices.get(position).getClass().getName());
+            viewHolder.getServiceNameTextView().setText(gattServices.get(position).toString()+ "");
             viewHolder.getServiceUUIDTextView().setText(gattServices.get(position).getUuid()+"");
-            viewHolder.getServicePermissionTextView().setText((gattServices.get(position).getType() == 1 )?"primary":"secondary");
+            viewHolder.getServicePermissionTextView().setText((gattServices.get(position).getType() == 0 )?"primary":"secondary");
 
 
         }
@@ -311,10 +329,11 @@ public class BleGattActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        gattServices = mBLE.getSupportedGattServices();
-
+//        gattServices = mBLE.getSupportedGattServices();
+//        mBLE.connect(deviceAddress);
         serviceRecyclerViewAdapter = new ServiceRecyclerViewAdapter();
         recyclerView.setAdapter(serviceRecyclerViewAdapter);
+
 
     }
 
@@ -327,7 +346,7 @@ public class BleGattActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         mBLE.disconnect();
+        mBLE.close();
     }
-
     ;
 }
