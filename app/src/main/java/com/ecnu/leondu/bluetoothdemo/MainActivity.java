@@ -41,7 +41,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
-    private final static String UUID_KEY_DATA = "0000ffe1-0000-1000-8000-00805f9b34fb";
+    private final static String UUID_KEY_DATA = "f0001132-0451-4000-b000-000000000000";
     // ListAdapter
     private ListView listView;
     private LeDeviceListAdapter mLeDeviceListAdapter;
@@ -90,7 +90,10 @@ public class MainActivity extends AppCompatActivity {
 //                    bluetoothAdapter.stopLeScan(mLeScanCallback);
                     device = mLeDeviceListAdapter.getDevice(position);
 
-                    mBLE.connect(device.getAddress());
+//                    mBLE.connect(device.getAddress());
+                    Intent intent = new Intent(MainActivity.this, BleGattActivity.class);
+                    intent.putExtra("Device_Address", device.getAddress());
+                    startActivity(intent);
 
 
                 } else {
@@ -99,6 +102,29 @@ public class MainActivity extends AppCompatActivity {
                 ;
             }
         });
+      listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+          @Override
+          public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+
+              BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
+              if (device != null) {
+
+//                    bluetoothAdapter.stopLeScan(mLeScanCallback);
+                  device = mLeDeviceListAdapter.getDevice(position);
+
+//                    mBLE.connect(device.getAddress());
+                  Intent intent = new Intent(MainActivity.this, BleServiceActivity.class);
+                  intent.putExtra("Device_Address", device.getAddress());
+                  startActivity(intent);
+
+
+              } else {
+                  Toast.makeText(getBaseContext(), "地址为空", Toast.LENGTH_SHORT).show();
+              }
+              ;
+              return false;
+          }
+      });
 
 
         // 确认设备是否支持蓝牙BLE
@@ -133,7 +159,7 @@ public class MainActivity extends AppCompatActivity {
         }
         //发现BLE终端的Service时回调
 
-        mBLE.setOnServiceDiscoverListener(mOnServiceDiscover);
+//        mBLE.setOnServiceDiscoverListener(mOnServiceDiscover);
 //        //收到BLE终端数据交互的事件
         mBLE.setOnDataAvailableListener(mOnDataAvailable);
 
@@ -245,14 +271,10 @@ public class MainActivity extends AppCompatActivity {
         public void onServiceDiscover(BluetoothGatt gatt) {
 
 //            displayGattServices(mBLE.getSupportedGattServices());
-            MainActivity.gattServices = gatt.getServices();
-            Toast.makeText(getBaseContext(),"MainActivity --->> 发现服务!! ",Toast.LENGTH_SHORT).show();
-            Intent intent = new Intent(MainActivity.this, BleGattActivity.class);
-            intent.putExtra("Device_Address", device.getAddress());
-            Toast.makeText(getBaseContext(),"连接地址是"+device.getAddress()+"\n"+"设备名称是："+device.getName(),Toast.LENGTH_SHORT).show();
-            startActivity(intent);
-        }
+//            MainActivity.gattServices = gatt.getServices();
+//            MainActivity.gattServices = gatt.getServices();
 
+        }
     };
 
     /**

@@ -252,6 +252,17 @@ public class BluetoothLeClass{
             return;
         }
         mBluetoothGatt.setCharacteristicNotification(characteristic, enabled);
+
+        // 这部分一定要加上
+        BluetoothGattDescriptor clientConfig = characteristic.getDescriptor(UUID.fromString("00002902-0000-1000-8000-00805f9b34fb"));
+
+        if (enabled) {
+            clientConfig.setValue(BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE);
+        } else {
+            clientConfig.setValue(BluetoothGattDescriptor.DISABLE_NOTIFICATION_VALUE);
+        }
+        mBluetoothGatt.writeDescriptor(clientConfig);
+
     }
 
     public void writeCharacteristic(BluetoothGattCharacteristic characteristic){
