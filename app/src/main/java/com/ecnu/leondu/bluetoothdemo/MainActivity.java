@@ -80,28 +80,28 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         pairedDevices = new ArrayList<BluetoothDevice>();
         listView = (ListView) findViewById(R.id.listView);
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-
-                BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-                if (device != null) {
-
-//                    bluetoothAdapter.stopLeScan(mLeScanCallback);
-                    device = mLeDeviceListAdapter.getDevice(position);
-
-//                    mBLE.connect(device.getAddress());
-                    Intent intent = new Intent(MainActivity.this, BleGattActivity.class);
-                    intent.putExtra("Device_Address", device.getAddress());
-                    startActivity(intent);
-
-
-                } else {
-                    Toast.makeText(getBaseContext(), "地址为空", Toast.LENGTH_SHORT).show();
-                }
-                ;
-            }
-        });
+//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+//
+//                BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
+//                if (device != null) {
+//
+////                    bluetoothAdapter.stopLeScan(mLeScanCallback);
+//                    device = mLeDeviceListAdapter.getDevice(position);
+//
+////                    mBLE.connect(device.getAddress());
+//                    Intent intent = new Intent(MainActivity.this, BleGattActivity.class);
+//                    intent.putExtra("Device_Address", device.getAddress());
+//                    startActivity(intent);
+//
+//
+//                } else {
+//                    Toast.makeText(getBaseContext(), "地址为空", Toast.LENGTH_SHORT).show();
+//                }
+//                ;
+//            }
+//        });
       listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
           @Override
           public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -113,7 +113,7 @@ public class MainActivity extends AppCompatActivity {
                   device = mLeDeviceListAdapter.getDevice(position);
 
 //                    mBLE.connect(device.getAddress());
-                  Intent intent = new Intent(MainActivity.this, BleServiceActivity.class);
+                  Intent intent = new Intent(MainActivity.this, SheetMusicActivity.class);
                   intent.putExtra("Device_Address", device.getAddress());
                   startActivity(intent);
 
