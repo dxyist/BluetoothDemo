@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity {
 
     private final static String TAG = MainActivity.class.getSimpleName();
     private final static String UUID_KEY_DATA = "f0001132-0451-4000-b000-000000000000";
+    private final static String UUID_KEY_DATA_SEND = "f0001131-0451-4000-b000-000000000000";
+
     // ListAdapter
     private ListView listView;
     private LeDeviceListAdapter mLeDeviceListAdapter;
@@ -80,28 +82,28 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         pairedDevices = new ArrayList<BluetoothDevice>();
         listView = (ListView) findViewById(R.id.listView);
-//        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-//
-//                BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
-//                if (device != null) {
-//
-////                    bluetoothAdapter.stopLeScan(mLeScanCallback);
-//                    device = mLeDeviceListAdapter.getDevice(position);
-//
-////                    mBLE.connect(device.getAddress());
-//                    Intent intent = new Intent(MainActivity.this, BleGattActivity.class);
-//                    intent.putExtra("Device_Address", device.getAddress());
-//                    startActivity(intent);
-//
-//
-//                } else {
-//                    Toast.makeText(getBaseContext(), "地址为空", Toast.LENGTH_SHORT).show();
-//                }
-//                ;
-//            }
-//        });
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+
+                BluetoothDevice device = mLeDeviceListAdapter.getDevice(position);
+                if (device != null) {
+
+//                    bluetoothAdapter.stopLeScan(mLeScanCallback);
+                    device = mLeDeviceListAdapter.getDevice(position);
+
+//                    mBLE.connect(device.getAddress());
+                    Intent intent = new Intent(MainActivity.this, TestActivity.class);
+                    intent.putExtra("Device_Address", device.getAddress());
+                    startActivity(intent);
+
+
+                } else {
+                    Toast.makeText(getBaseContext(), "地址为空", Toast.LENGTH_SHORT).show();
+                }
+                ;
+            }
+        });
       listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
           @Override
           public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
@@ -356,6 +358,24 @@ public class MainActivity extends AppCompatActivity {
 
                 //UUID_KEY_DATA是可以跟蓝牙模块串口通信的Characteristic
                 if (gattCharacteristic.getUuid().toString().equals(UUID_KEY_DATA)) {
+                    //测试读取当前Characteristic数据，会触发mOnDataAvailable.onCharacteristicRead()
+//                    mHandler.postDelayed(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            mBLE.readCharacteristic(gattCharacteristic);
+//                        }
+//                    }, 500);
+
+                    //接受Characteristic被写的通知,收到蓝牙模块的数据后会触发mOnDataAvailable.onCharacteristicWrite()
+                    mBLE.setCharacteristicNotification(gattCharacteristic, true);
+                    //设置数据内容
+                    gattCharacteristic.setValue("send data->");
+                    //往蓝牙模块写入数据
+                    mBLE.writeCharacteristic(gattCharacteristic);
+                }
+
+                //UUID_KEY_DATA是可以跟蓝牙模块串口通信的Characteristic
+                if (gattCharacteristic.getUuid().toString().equals(UUID_KEY_DATA_SEND)) {
                     //测试读取当前Characteristic数据，会触发mOnDataAvailable.onCharacteristicRead()
                     mHandler.postDelayed(new Runnable() {
                         @Override

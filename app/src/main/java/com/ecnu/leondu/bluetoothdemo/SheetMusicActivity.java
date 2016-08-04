@@ -12,12 +12,13 @@ import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Vibrator;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -36,6 +37,7 @@ import com.larvalabs.svgandroid.SVGParser;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -46,11 +48,18 @@ public class SheetMusicActivity extends AppCompatActivity {
 
     private final static String TAG = SheetMusicActivity.class.getSimpleName();
     private final static String UUID_KEY_DATA = "f0001132-0451-4000-b000-000000000000";
+    private final static String UUID_KEY_DATA_SEND = "f0001131-0451-4000-b000-000000000000";
+
+    private MyView myView;
+
+    private SoundPool correctSoundPool;
+    private SoundPool wrongSoundPool;
 
     public BluetoothLeClass mBLE;
     public BluetoothAdapter bluetoothAdapter;
     BluetoothDevice bluetoothDevice;
     private String deviceAddress;
+
 
     List<BluetoothGattService> gattServices;
 
@@ -138,6 +147,15 @@ public class SheetMusicActivity extends AppCompatActivity {
         setContentView(R.layout.activity_sheet_music);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        myView = (MyView) findViewById(R.id.myView_hint);
+
+        correctSoundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
+        correctSoundPool.load(this, R.raw.correct, 1);
+
+        wrongSoundPool = new SoundPool(10, AudioManager.STREAM_SYSTEM, 5);
+        wrongSoundPool.load(this, R.raw.wrong, 1);
+
 
         //---------蓝牙部分--------
         mBLE = MainActivity.mBLE;
@@ -236,6 +254,7 @@ public class SheetMusicActivity extends AppCompatActivity {
         }
 
         // 五线谱框格
+
         SVG svg = SVGParser.getSVGFromResource(getResources(), R.raw.staff);
         staff.setImageDrawable(svg.createPictureDrawable());
 
@@ -366,6 +385,7 @@ public class SheetMusicActivity extends AppCompatActivity {
             // 如果触发按键后,检测到不是当前状态"正确按键"的位置,则认为错误,进行错误的处理
             if (!absolutePitchString.trim().equals(current_AbsolutePitch.trim())) {
                 ++num_wrong;
+                wrongSoundPool.play(1, 2f, 2f, 0, 0, 1.2f);
 
                 if (enable_show_correct) {
                     current_button.setTextColor(Color.BLUE);
@@ -378,12 +398,19 @@ public class SheetMusicActivity extends AppCompatActivity {
             } else {
                 ++num_right;
 
+                myView.start();
+                correctSoundPool.play(1, 0.5f, 0.5f, 0, 0, 1.2f);
+
+//                try {
+//                    Thread.sleep(1000);
+//                } catch (InterruptedException e) {
+//                    e.printStackTrace();
+//                }
+
                 if (enable_show_correct) {
                     current_button.setTextColor(default_color);
                     current_button.setTypeface(Typeface.DEFAULT);
                 }
-
-                // 这里，直到next_note()返回了程序结束
                 if (!next_note()) {
                     // 程序执行完毕
                     long time_end = System.currentTimeMillis();
@@ -398,6 +425,8 @@ public class SheetMusicActivity extends AppCompatActivity {
                     stop();
                     finish();
                 }
+
+                // 这里，直到next_note()返回了程序结束
             }
 
 
@@ -511,11 +540,28 @@ public class SheetMusicActivity extends AppCompatActivity {
                     mBLE.setCharacteristicNotification(gattCharacteristic, true);
 
 
-                    //设置数据内容
+////                    设置数据内容
 //                    gattCharacteristic.setValue("send data->");
 //                    //往蓝牙模块写入数据
 //                    mBLE.writeCharacteristic(gattCharacteristic);
                 }
+
+//                //UUID_KEY_DATA是可以跟蓝牙模块串口通信的Characteristic
+//                if (gattCharacteristic.getUuid().toString().equals(UUID_KEY_DATA_SEND)) {
+//                    //测试读取当前Characteristic数据，会触发mOnDataAvailable.onCharacteristicRead()
+////                    mHandler.postDelayed(new Runnable() {
+////                        @Override
+////                        public void run() {
+////                            mBLE.readCharacteristic(gattCharacteristic);
+////                        }
+////                    }, 500);
+//                    Log.e(TAG, "写入数据!!!");
+//
+////                    设置数据内容
+//                    gattCharacteristic.setValue("MILLISECOND：-> " + (new GregorianCalendar()).get(GregorianCalendar.MILLISECOND));
+//                    //往蓝牙模块写入数据
+//                    mBLE.writeCharacteristic(gattCharacteristic);
+//                }
 
                 //-----Descriptors的字段信息-----//
                 List<BluetoothGattDescriptor> gattDescriptors = gattCharacteristic.getDescriptors();
