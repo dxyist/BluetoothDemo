@@ -7,6 +7,7 @@ public class CootekTest {
     String password = "1123123";
     String passwd = "wjdiqjwdijq";
     int pass = 123132;
+    String passcotect = "cootek";
     String test = "pass:123123123";
     String test2 = "pass==>123123123";
 }

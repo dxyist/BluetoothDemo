@@ -379,7 +379,13 @@ public class SheetMusicActivity extends AppCompatActivity {
 
             Bundle b = msg.getData();
             String keyString = b.getString("key");
-            int key = Integer.parseInt(keyString.trim(), 16);
+            int channel = Integer.parseInt(keyString.trim().substring(0,2), 16);
+            int key = Integer.parseInt(keyString.trim().substring(3,5), 16);
+
+            int pressValue = Integer.parseInt(keyString.trim().substring(6,8), 16);
+            if (pressValue == 0)
+               return;
+
             String absolutePitchString = KeyPitchToAbsolutePitch(key);
             pianoAabsolutePitchTextview.setText(absolutePitchString + "");
             // 如果触发按键后,检测到不是当前状态"正确按键"的位置,则认为错误,进行错误的处理
